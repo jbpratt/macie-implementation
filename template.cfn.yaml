@@ -1,0 +1,58 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: |
+  On creation of an S3 bucket, trigger a Lambda to create a Macie Classification Job tied to the bucket
+
+Transform: "AWS::Serverless-2016-10-31"
+
+Resources:
+  EventBus:
+    Type: "AWS::Events::EventBus"
+    Properties:
+      Name: s3-lifecycle-events
+
+  MacieFindingsRule:
+    Type: "AWS::Events::Rule"
+    Properties:
+      EventPattern:
+        detail-type:
+          - Macie Finding
+        source:
+          - aws.macie
+
+  Function:
+    Type: "AWS::Serverless::Function"
+    Properties:
+      CodeUri: src/
+      Events:
+        S3Rule:
+          Type: EventBridgeRule
+          Properties:
+            EventBusName: !GetAtt EventBus.Name
+            Pattern:
+              detail:
+                eventName:
+                  - DeleteBucket
+                  - CreateBucket
+                eventSource:
+                  - s3.amazonaws.com
+              detail-type:
+                - AWS API Call via CloudTrail
+              source:
+                - aws.s3
+      Handler: app.handler
+      MemorySize: 128
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action:
+                - "macie:*"
+                - "macie2:*"
+                - "logs:CreateLogGroup"
+                - "logs:CreateLogStream"
+                - "logs:PutLogEvents"
+              Resource:
+                - "*"
+          Version: "2012-10-17"
+      Runtime: python3.8
+      Timeout: 240

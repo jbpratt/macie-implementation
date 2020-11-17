@@ -1,0 +1,21 @@
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    sha: v3.3.0
+    hooks:
+    -   id: check-merge-conflict
+    -   id: debug-statements
+    -   id: detect-aws-credentials
+    -   id: end-of-file-fixer
+    -   id: trailing-whitespace
+-   repo: https://github.com/asottile/reorder_python_imports
+    rev: v2.3.5
+    hooks:
+    -   id: reorder-python-imports
+-   repo: https://github.com/ambv/black
+    rev: stable
+    hooks:
+    - id: black
+-   repo: https://github.com/awslabs/cfn-python-lint
+    rev: v0.33.0 # The version of cfn-lint to use
+    hooks:
+    -   id: cfn-python-lint
+        files: \.\.cfn\..(yaml|json|yml)$

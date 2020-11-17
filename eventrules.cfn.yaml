@@ -1,0 +1,52 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Parameters:
+  EventBusArn:
+    Type: String
+    Description: Arn of the cross account event bus in which to aggregate events to
+
+Resources:
+  Role:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - events.amazonaws.com
+            Action:
+              - "sts:AssumeRole"
+      Policies:
+        - PolicyName: S3LifecyclePutEvents
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Sid: VisualEditor0
+                Effect: Allow
+                Action:
+                  - "events:PutEvents"
+                Resource: !Ref EventBusArn
+      RoleName: s3-lifecycle-events-role
+
+  Rule:
+    Type: "AWS::Events::Rule"
+    Properties:
+      EventPattern:
+        detail:
+          eventName:
+            - DeleteBucket
+            - CreateBucket
+          eventSource:
+            - s3.amazonaws.com
+        detail-type:
+          - AWS API Call via CloudTrail
+        source:
+          - aws.s3
+      Name: S3LifecycleEvents
+      State: ENABLED
+      Targets:
+        - Arn: !Ref EventBusArn
+          Id: S3LifecycleEventsCrossAccount
+          RoleArn: !GetAtt Role.Arn
