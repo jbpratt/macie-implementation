@@ -18,4 +18,4 @@
     rev: v0.33.0 # The version of cfn-lint to use
     hooks:
     -   id: cfn-python-lint
-        files: \.\.cfn\..(yaml|json|yml)$
+        files: \.cfn\.(yaml|json)$
