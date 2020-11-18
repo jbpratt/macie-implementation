@@ -1,7 +1,4 @@
-from typing import Any
 from typing import Dict
-from typing import List
-from typing import Tuple
 from typing import TYPE_CHECKING
 
 import boto3
