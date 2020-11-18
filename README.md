@@ -7,23 +7,42 @@
 1. [Delegate an administrator account](https://docs.aws.amazon.com/macie/latest/user/macie-organizations.html)
 
 Macie allows for a similar delegation to the GuardDuty service, so a single
-account can act as the orchestrator. Delegating an account admin means that all
-of the findings generated from jobs will be available for download in the
-console or using the API and this account now has readonly access to
-Organizations data.
+account can act as the main orchestration point. Delegating an account admin
+means that all of findings generated from jobs will be available for download in
+the console or using the API and this account now has readonly access to
+Organizations data. The admin account can then enable and manage Macie in all of
+the member accounts. It is also possible to integrate accounts that live outside
+of the admin's organization by inviting it.
 
-The admin account can then enable and manage Macie in all of the member
-accounts. It is also possible to to integrate accounts that live outside of the
-admin's organization by inviting it.
-
-2. Aggregate S3 lifecycle events for creating and canceling classification jobs
+2. Aggregate S3 life-cycle events for creating and canceling classification jobs
 
 Using EventBridge, a rule can be deployed to each account that should be brought
 into scope which matches for `s3:CreateBucket` and `s3:DeleteBucket`. As a
 target for the rule, a custom event bus can be set up in the delegated
-administrator account.
+administrator account which will allow funneling all account S3 life-cycle
+events into a single rule.
 
-Tracking the lifecycle of an S3 bucket allows for creation and cancelation of
+```json
+{
+  "source": [
+    "aws.s3"
+  ],
+  "detail-type": [
+    "AWS API Call via CloudTrail"
+  ],
+  "detail": {
+    "eventSource": [
+      "s3.amazonaws.com"
+    ],
+    "eventName": [
+      "CreateBucket",
+      "DeleteBucket"
+    ]
+  }
+}
+```
+
+Tracking the life-cycle of an S3 bucket allows for creation and cancellation of
 classification jobs. When creating a job, it can be beneficial to flesh out the
 `s3JobDefinition` which can allow object level scoping based on file attributes
 or tags. Additional custom classifiers can be added as well as adjusting the job
@@ -33,13 +52,27 @@ containing the single bucket that has been deleted.
 3. Route the Macie findings to the proper teams infrastructure
 
 Setting up a rule from the pre-baked patterns that EventBridge provides, Macie
-finding events can be captured. This is the same data that is aggregated in the
-console when viewing or exporting. Establishing a similar architecture as above,
-these events of a sensitive data being identified and classified can be routed
-into a different account for additional analysis (SIEM/logging account).
+finding events can be captured and acted on. This is the same data that is
+aggregated in the console when viewing or exporting. Establishing a similar
+architecture as above, these events of sensitive data being identified and
+classified can be routed into a different account for additional analysis
+(SIEM/logging account). On top of routing to other resources, we can attach
+multiple targets to the an event and take multiple actions.
+
+```json
+{
+  "source": [
+    "aws.macie"
+  ],
+  "detail-type": [
+    "Macie Finding"
+  ]
+}
+```
+
 
 The rule that is provisioned in the admin account currently has no targets set.
-This will allow for optional routing into the the desired resoucres or simply
+This will allow for optional routing into the the desired resources or simply
 deleting the rule and taking advantage of the console which allows for
 exporting.
 

@@ -70,8 +70,8 @@ def list_macie_buckets(
     macie: "Macie2Client" = boto3.client("macie2"),
 ) -> Dict[str, Dict[str, str]]:
     """
-    return a list of classification jobs in the form of:
-    [("job_id", "bucket_name", "account_id") ...]
+    return a dict of classification jobs in the form of:
+    {"bucket_name": {"jobId": <jobId>, "accountId": <accountId>}, ...}
     """
 
     paginator = macie.get_paginator("list_classification_jobs")
