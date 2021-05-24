@@ -25,7 +25,7 @@ repos:
     hooks:
     - id: black
 -   repo: https://github.com/awslabs/cfn-python-lint
-    rev: v0.49.1 # The version of cfn-lint to use
+    rev: v0.49.2 # The version of cfn-lint to use
     hooks:
     -   id: cfn-python-lint
         files: \.cfn\.(yaml|json)$
