@@ -21,11 +21,11 @@ repos:
     hooks:
     -   id: reorder-python-imports
 -   repo: https://github.com/psf/black
-    rev: 21.9b0
+    rev: 21.10b0
     hooks:
     - id: black
 -   repo: https://github.com/awslabs/cfn-python-lint
-    rev: v0.54.3 # The version of cfn-lint to use
+    rev: v0.54.4 # The version of cfn-lint to use
     hooks:
     -   id: cfn-python-lint
         files: \.cfn\.(yaml|json)$
